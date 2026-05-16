@@ -4,7 +4,7 @@ import uploadSongToCloudinary from "../services/cloudinaryService.js";
 
 export const uploadSong = async (req, res) => {
   try {
-    const result = await uploadSongToCloudinary(req.file.path);
+    const result = await uploadSongToCloudinary(req.file.buffer);
 
     const song = await Song.create({
       title: req.body.title,
@@ -12,8 +12,6 @@ export const uploadSong = async (req, res) => {
       audioUrl: result.secure_url,
       uploadedBy: req.user.id
     });
-
-    fs.unlinkSync(req.file.path);
 
     res.status(201).json(song);
   }
@@ -26,9 +24,8 @@ export const uploadSong = async (req, res) => {
 
 export const getSongs = async (req, res) => {
   try {
-    const songs = await Song.find().populate(
-      "uploadedBy",
-      "name email"
+    const songs = await Song.find().select(
+      "title artist audioUrl"
     );
 
     res.status(200).json(songs);

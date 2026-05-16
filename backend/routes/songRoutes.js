@@ -6,7 +6,7 @@ import upload from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getSongs);
+router.get("/",authMiddleware, getSongs);
 router.post("/upload",authMiddleware,adminMiddleware,upload.single("audio"),uploadSong);
 
 export default router;
