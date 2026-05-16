@@ -1,13 +1,40 @@
-export default function Navbar() {
-  const logout = () => {
-    localStorage.removeItem("user");
-    window.location.href = "/auth";
+import { useNavigate } from "react-router-dom";
+
+import { useAuth } from "../context/AuthContext";
+
+const Navbar = () => {
+
+  const { logout } = useAuth();
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+
+    logout();
+
+    navigate("/auth");
   };
 
   return (
-    <div className="navbar">
-      <h2>MusicApp</h2>
-      <button onClick={logout}>Logout</button>
+
+    <div
+      style={{
+        padding: "16px",
+        display: "flex",
+        justifyContent: "space-between",
+        background: "black",
+        color: "white"
+      }}
+    >
+
+      <h2>Melody</h2>
+
+      <button onClick={handleLogout}>
+        Logout
+      </button>
+
     </div>
   );
-}
+};
+
+export default Navbar;
