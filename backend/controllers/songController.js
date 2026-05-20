@@ -1,5 +1,6 @@
 import fs from "fs";
 import Song from "../models/Song.js";
+import Playlist from "../models/Playlist.js";
 import uploadSongToCloudinary from "../services/cloudinaryService.js";
 
 export const uploadSong = async (req, res) => {
@@ -22,13 +23,17 @@ export const uploadSong = async (req, res) => {
   }
 };
 
-export const getSongs = async (req, res) => {
+export const getAlbums = async (req, res) => {
   try {
-    const songs = await Song.find().select(
-      "title artist audioUrl"
-    );
-
-    res.status(200).json(songs);
+    const albums = await Playlist.find({
+      type: "album"
+    })
+      .populate({
+        path: "songs",
+        select: "title artist audioUrl"
+      })
+      .select("title description songs type");
+    res.status(200).json(albums);
   }
   catch (error) {
     res.status(500).json({

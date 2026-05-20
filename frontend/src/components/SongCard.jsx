@@ -17,7 +17,7 @@ const SongCard = ({ song, isActive, onPlay, onPause }) => {
   const [playing, setPlaying]       = useState(false);
   const [current, setCurrent]       = useState(0);
   const [duration, setDuration]     = useState(0);
-  const [volume, setVolume]         = useState(0.8);
+  const [volume, setVolume]         = useState(0.5);
   const [muted, setMuted]           = useState(false);
   const [dragging, setDragging]     = useState(false);
 

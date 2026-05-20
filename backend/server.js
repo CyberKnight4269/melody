@@ -6,6 +6,7 @@ dotenv.config();
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import songRoutes from "./routes/songRoutes.js";
+import playlistRoutes from "./routes/playlistRoutes.js";
 import connectDB from "./config/db.js";
 
 const app = express();
@@ -15,6 +16,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/songs", songRoutes);
+app.use("/api/playlists", playlistRoutes);
 
 connectDB();
 
