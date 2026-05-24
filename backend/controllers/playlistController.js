@@ -106,6 +106,13 @@ export const addSongsToPlaylist = async (
       });
     }
 
+    const existingIds = new Set(playlist.songs.map((id) => id.toString()));
+    const newSongs = songs.filter((id) => !existingIds.has(id));
+ 
+    if (newSongs.length === 0) {
+      return res.status(400).json({ message: "Song is already in this playlist" });
+    }
+
     playlist.songs.push(...songs);
 
     await playlist.save();
