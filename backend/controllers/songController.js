@@ -1,7 +1,7 @@
 import fs from "fs";
 import Song from "../models/Song.js";
 import Playlist from "../models/Playlist.js";
-import uploadSongToCloudinary from "../services/cloudinaryService.js";
+import {uploadSongToCloudinary, uploadImageToCloudinary} from "../services/cloudinaryService.js";
 
 export const getAllSongs = async (req, res) => {
   try {
@@ -23,12 +23,12 @@ export const getAllSongs = async (req, res) => {
             }
           }]
       }).select(
-        "title artist audioUrl"
+        "title artist audioUrl coverUrl"
       );
       return res.status(200).json(songs);
     }
 
-    const result = await Song.find().select("title artist audioUrl");
+    const result = await Song.find().select("title artist audioUrl coverUrl");
     res.status(200).json(result);
   }
   catch(error) {
@@ -38,12 +38,14 @@ export const getAllSongs = async (req, res) => {
 
 export const uploadSong = async (req, res) => {
   try {
-    const result = await uploadSongToCloudinary(req.file.buffer);
+    const audio = await uploadSongToCloudinary(req.files.audio[0].buffer);
+    const cover = await uploadImageToCloudinary(req.files.cover[0].buffer);
 
     const song = await Song.create({
       title: req.body.title,
       artist: req.body.artist,
-      audioUrl: result.secure_url,
+      audioUrl: audio.secure_url,
+      coverUrl: cover.secure_url,
       uploadedBy: req.user.id
     });
 
@@ -63,9 +65,9 @@ export const getAlbums = async (req, res) => {
     })
       .populate({
         path: "songs",
-        select: "title artist audioUrl"
+        select: "title artist audioUrl coverUrl"
       })
-      .select("title description songs type");
+      .select("title description songs coverUrl type");
     res.status(200).json(albums);
   }
   catch (error) {

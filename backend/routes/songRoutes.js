@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.get("/",authMiddleware, getAllSongs);
 router.get("/albums",authMiddleware, getAlbums);
-router.post("/upload",authMiddleware,adminMiddleware,upload.single("audio"),uploadSong);
+// router.post("/upload",authMiddleware,adminMiddleware,upload.single("audio"),uploadSong);
+router.post("/upload",authMiddleware,adminMiddleware,upload.fields([{name: "audio",maxCount: 1},{name: "cover",maxCount: 1}]),uploadSong);
 
 export default router;

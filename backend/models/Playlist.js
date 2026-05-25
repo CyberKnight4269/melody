@@ -12,6 +12,11 @@ const playlistSchema = new mongoose.Schema(
       default: ""
     },
 
+    coverUrl: {
+      type: String,
+      default: ""
+    },
+
     type: {
       type: String,
       enum: ["album", "list"],

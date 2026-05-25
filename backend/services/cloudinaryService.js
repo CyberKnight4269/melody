@@ -1,21 +1,58 @@
 import cloudinary from "../config/cloudinary.js";
 import streamifier from "streamifier";
 
-const uploadSongToCloudinary = (fileBuffer) => {
-  return new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        resource_type: "video",
-        folder: "songs"
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
+const uploadToCloudinary = (
+  fileBuffer,
+  options
+) => {
 
-    streamifier.createReadStream(fileBuffer).pipe(stream);
+  return new Promise((resolve, reject) => {
+
+    const stream =
+      cloudinary.uploader.upload_stream(
+
+        options,
+
+        (error, result) => {
+
+          if (error) {
+            reject(error);
+          } else {
+            resolve(result);
+          }
+
+        }
+      );
+
+    streamifier
+      .createReadStream(fileBuffer)
+      .pipe(stream);
+
   });
 };
 
-export default uploadSongToCloudinary;
+export const uploadSongToCloudinary = async (
+  audioBuffer
+) => {
+
+  return await uploadToCloudinary(
+    audioBuffer,
+    {
+      resource_type: "video",
+      folder: "songs"
+    }
+  );
+};
+
+export const uploadImageToCloudinary = async (
+  imageBuffer
+) => {
+
+  return await uploadToCloudinary(
+    imageBuffer,
+    {
+      resource_type: "image",
+      folder: "song-covers"
+    }
+  );
+};

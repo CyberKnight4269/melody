@@ -4,8 +4,9 @@ import api from "../api/axios";
 const UploadModal = ({ onClose, onUploaded }) => {
   const fileRef = useRef(null);
 
-  const [form, setForm] = useState({ title: "", artist: "" });
+  const [form, setForm] = useState({ title: "", artist: "", coverUrl: "" });
   const [file, setFile] = useState(null);
+  const [coverFile, setCoverFile] = useState(null);
   const [draggingFile, setDraggingFile] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -44,14 +45,15 @@ const UploadModal = ({ onClose, onUploaded }) => {
       data.append("title", form.title.trim());
       data.append("artist", form.artist.trim());
       data.append("audio", file);
+      if (coverFile) data.append("cover", coverFile);
 
-      await api.post("/songs/upload", data, {
+      const res = await api.post("/songs/upload", data, {
         headers: { "Content-Type": "multipart/form-data" },
         onUploadProgress: (e) =>
           setProgress(Math.round((e.loaded / e.total) * 100)),
       });
 
-      onUploaded();
+      onUploaded(res.data);
       onClose();
     } catch (err) {
       setError(err.response?.data?.message || "Upload failed. Please try again.");
@@ -172,6 +174,13 @@ const UploadModal = ({ onClose, onUploaded }) => {
                 disabled={uploading}
                 autoComplete="off"
               />
+            </div>
+
+            <div className="form-group">
+              <label>Cover image <span style={{color:"var(--text-muted)",fontWeight:400}}>(optional)</span></label>
+              <input type="file" accept="image/*"
+                onChange={(e) => setCoverFile(e.target.files[0])}
+                disabled={uploading} />
             </div>
           </div>
 

@@ -17,6 +17,11 @@ const songSchema = new mongoose.Schema(
       required: true
     },
 
+    coverUrl: {
+      type: String,
+      required: true
+    },
+
     uploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User"

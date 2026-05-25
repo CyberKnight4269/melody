@@ -1,4 +1,5 @@
 import Playlist from "../models/Playlist.js";
+import {uploadImageToCloudinary} from "../services/cloudinaryService.js";
 
 export const createPlaylist = async (req, res) => {
 
@@ -20,10 +21,18 @@ export const createPlaylist = async (req, res) => {
       });
     }
 
+    let coverUrl = "";
+
+    if (req.files && req.files.cover) {
+      const uploadedCover = await uploadImageToCloudinary(req.files.cover[0].buffer);
+      coverUrl = uploadedCover.secure_url;
+    }
+
     const playlist = await Playlist.create({
       title,
       description,
       type,
+      coverUrl: coverUrl,
       songs,
       createdBy: req.user.id
     });
@@ -49,7 +58,7 @@ export const getPlaylists = async (req,res) => {
     )
       .populate({
         path: "songs",
-        select: "title artist audioUrl"
+        select: "title artist audioUrl coverUrl"
       })
       .populate(
         "createdBy",
@@ -74,7 +83,6 @@ export const addSongsToPlaylist = async (
     try {
 
     const { playlistId } = req.params;
-
     const { songs } = req.body;
 
     const playlist = await Playlist.findById(
@@ -121,7 +129,7 @@ export const addSongsToPlaylist = async (
       playlistId
     ).populate({
       path: "songs",
-      select: "title artist audioUrl"
+      select: "title artist audioUrl coverUrl"
     });
     res.status(200).json(updatedPlaylist);
     } catch (error) {
@@ -176,7 +184,7 @@ export const removeSongsFromPlaylist = async (
       playlistId
     ).populate({
       path: "songs",
-      select: "title artist audioUrl"
+      select: "title artist audioUrl coverUrl"
     });
 
     res.status(200).json(updatedPlaylist);
