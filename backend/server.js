@@ -11,7 +11,7 @@ import connectDB from "./config/db.js";
 
 const app = express();
 
-app.use(cors({origin: ["http://localhost:5173","https://your-app.vercel.app"]}));
+app.use(cors({origin: ["http://localhost:5173","https://melody-sooty.vercel.app/"]}));
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
