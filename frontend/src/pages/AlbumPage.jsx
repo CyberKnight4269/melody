@@ -6,6 +6,7 @@ import Navbar            from "../components/Navbar";
 import SongCard          from "../components/SongCard";
 import UploadModal       from "../components/UploadModal";
 import AddToPlaylistModal from "../components/AddToPlaylistModal";
+import { useSongQueue } from "../hooks/useSongQueue";
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80";
 
@@ -13,17 +14,30 @@ const AlbumPage = () => {
   const { albumId }  = useParams();
   const navigate     = useNavigate();
   const { isAdmin }  = useAuth();
+  const { activeSong, playQueue, playNext, clearQueue } = useSongQueue();
 
   const [album,      setAlbum]      = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [activeSongId, setActiveSongId] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [addToPlaylistSong, setAddToPlaylistSong] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // For admin: attach a loose song to this album
   const [allSongs,   setAllSongs]   = useState([]);
   const [showAttach, setShowAttach] = useState(false);
   const [attaching,  setAttaching]  = useState(false);
+
+  const handlePlayAll = () => {
+  if (!album?.songs?.length) return;
+    playQueue(album.songs, 0);
+    setIsPlaying(true);
+  };
+
+  const handleStopAll = () => {
+    clearQueue();
+    setIsPlaying(false);
+  };
 
   const fetchAlbum = async () => {
     try {
@@ -92,6 +106,8 @@ const AlbumPage = () => {
     </div>
   );
 
+  const songs = album.songs ?? [];
+
   return (
     <div className="home-page">
       <Navbar
@@ -114,6 +130,17 @@ const AlbumPage = () => {
             <h1 className="album-page-title">{album.title}</h1>
             {album.description && <p className="album-page-desc">{album.description}</p>}
             <p className="album-page-count">{album.songs?.length ?? 0} tracks</p>
+            {songs.length > 0 && (
+              <button
+                className={`btn-play-all${isPlaying && activeSong ? " playing" : ""}`}
+                onClick={isPlaying && activeSong ? handleStopAll : handlePlayAll}
+              >
+                <span className="play-all-icon">
+                  {isPlaying && activeSong ? "■" : "▶"}
+                </span>
+                {isPlaying && activeSong ? "Stop" : "Play all"}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -177,16 +204,17 @@ const AlbumPage = () => {
               <p>No songs in this album yet.</p>
             </div>
           ) : (
-            album.songs.map((song, i) => {
-              const id = song._id || i;
+            songs.map((song, idx) => {
+              const isActive = activeSong?._id === song._id;
               return (
                 <SongCard
-                  key={id}
+                  key={song._id}
                   song={song}
-                  isActive={activeSongId === id}
-                  onPlay={() => setActiveSongId(id)}
-                  onPause={() => setActiveSongId(null)}
-                  onAddToPlaylist={setAddToPlaylistSong}
+                  isActive={isActive}
+                  onPlay={() => { playQueue(songs, idx); setIsPlaying(true); }}
+                  onPause={() => setIsPlaying(false)}
+                  onAddToPlaylist={() => setAddToPlaylistSong(song)}
+                  onEnded={isActive ? () => { playNext(); setIsPlaying(true); } : undefined}
                 />
               );
             })

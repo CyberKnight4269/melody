@@ -4,6 +4,7 @@ import Navbar              from "../components/Navbar";
 import SongCard            from "../components/SongCard";
 import CreatePlaylistModal from "../components/CreatePlaylistModal";
 import AddToPlaylistModal  from "../components/AddToPlaylistModal";
+import { useSongQueue } from "../hooks/useSongQueue";
 
 const PlaylistsPage = () => {
   const [playlists,       setPlaylists]       = useState([]);
@@ -13,10 +14,23 @@ const PlaylistsPage = () => {
   const [showCreate,      setShowCreate]      = useState(false);
   const [addToPlaylistSong, setAddToPlaylistSong] = useState(null);
   const [removing,        setRemoving]        = useState(null);
+  const { activeSong, playQueue, playNext, clearQueue } = useSongQueue();
+  const [isPlaying, setIsPlaying] = useState(false);
 
   // Derive active playlist from playlists array — never stale
   const activePlaylist = playlists.find((p) => p._id === activePlaylistId) || null;
 
+  const handlePlayAll = () => {
+  if (!activePlaylist?.songs?.length) return;
+  playQueue(activePlaylist.songs, 0);
+  setIsPlaying(true);
+  };
+
+  const handleStopAll = () => {
+  clearQueue();
+  setIsPlaying(false);
+  };
+  
   const fetchPlaylists = async () => {
     try {
       const res = await api.get("/playlists");
@@ -74,7 +88,9 @@ const PlaylistsPage = () => {
                 <div
                   key={pl._id}
                   className={`playlist-item${activePlaylistId === pl._id ? " playlist-item--active" : ""}`}
-                  onClick={() => { setActivePlaylistId(pl._id); setActiveSongId(null); }}
+                  onClick={() => {
+                  if (pl._id !== activePlaylistId) { clearQueue(); setIsPlaying(false);}
+                  setActivePlaylistId(pl._id); setActiveSongId(null); }}
                 >
                   <div className="playlist-item-icon">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -90,7 +106,6 @@ const PlaylistsPage = () => {
                 </div>
               ))}
             </div>
-
             {/* Content */}
             <div className="playlists-content">
               {!activePlaylist ? (
@@ -99,8 +114,20 @@ const PlaylistsPage = () => {
                 </div>
               ) : (
                 <>
+                  const songs = activePlaylist.songs ?? [];
                   <div className="playlists-content-header">
                     <h3 className="playlists-content-title">{activePlaylist.title}</h3>
+                    {songs.length > 0 && (
+                      <button
+                        className={`btn-play-all${isPlaying && activeSong ? " playing" : ""}`}
+                        onClick={isPlaying && activeSong ? handleStopAll : handlePlayAll}
+                      >
+                        <span className="play-all-icon">
+                          {isPlaying && activeSong ? "■" : "▶"}
+                        </span>
+                        {isPlaying && activeSong ? "Stop" : "Play all"}
+                      </button>
+                    )}
                     {activePlaylist.description && (
                       <p className="playlists-content-desc">{activePlaylist.description}</p>
                     )}
@@ -114,17 +141,18 @@ const PlaylistsPage = () => {
                     </div>
                   ) : (
                     <div className="song-list">
-                      {activePlaylist.songs.map((song, i) => {
-                        const id = song._id || i;
+                      {activePlaylist.songs.map((song, idx) => {
+                        const isActive = activeSong?._id === song._id;
                         return (
                           <SongCard
-                            key={id}
+                            key={song._id}
                             song={song}
-                            isActive={activeSongId === id}
-                            onPlay={() => setActiveSongId(id)}
-                            onPause={() => setActiveSongId(null)}
-                            onAddToPlaylist={setAddToPlaylistSong}
-                            onRemoveFromPlaylist={(s) => handleRemoveSong(activePlaylist._id, s._id)}
+                            isActive={isActive}
+                            onPlay={() => { playQueue(songs, idx); setIsPlaying(true); }}
+                            onPause={() => setIsPlaying(false)}
+                            onAddToPlaylist={() => setAddToPlaylistSong(song)}
+                            onRemoveFromPlaylist={() => handleRemoveSong(activePlaylistId,song._id)}
+                            onEnded={isActive ? () => { playNext(); setIsPlaying(true); } : undefined}
                           />
                         );
                       })}

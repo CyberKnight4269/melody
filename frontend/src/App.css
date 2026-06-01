@@ -353,6 +353,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .navbar-user {
@@ -1160,6 +1161,67 @@ body {
 
 .btn-ghost-sm:disabled { opacity: 0.45; cursor: not-allowed; }
 
+/* Hide bottom bar on desktop */
+.bottom-tab-bar {
+  display: none;
+}
+
+@media (max-width: 750px) {
+  /* Hide nav links from top navbar on mobile */
+  .navbar-links {
+    display: none;
+  }
+
+  /* Show bottom tab bar */
+  .bottom-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: 60px;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 16px;
+  }
+
+  .bottom-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    padding: 8px 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 500;
+    transition: color 0.15s ease;
+  }
+
+  .bottom-tab:hover {
+    color: var(--text-secondary);
+  }
+
+  .bottom-tab--active {
+    color: var(--green);
+  }
+
+  .bottom-tab--active svg {
+    stroke: var(--green);
+  }
+
+  /* Add bottom padding to page content so it doesn't hide behind the tab bar */
+  .home-page {
+    padding-bottom: 60px;
+  }
+}
+
 /* ─── Home sections ─── */
 .home-section {
   padding: 40px 32px;
@@ -1678,4 +1740,49 @@ body {
 .search-bar-clear:hover {
   background: var(--border-hover);
   color: var(--text-primary);
+}
+
+.btn-play-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  background: var(--green);
+  color: #000;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.btn-play-all:hover {
+  background: #1ed760;
+  box-shadow: 0 4px 18px var(--green-glow);
+  transform: translateY(-1px);
+}
+
+.btn-play-all:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Toggled state when playback is active */
+.btn-play-all.playing {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+.btn-play-all.playing:hover {
+  background: var(--bg-hover);
+}
+
+.play-all-icon {
+  font-size: 0.75rem;
+  line-height: 1;
 }

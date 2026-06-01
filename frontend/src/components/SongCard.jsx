@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from "react";
+import { usePlayer } from "../context/PlayerContext";
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80";
 
@@ -9,7 +10,7 @@ const formatTime = (secs) => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
-const SongCard = ({ song, isActive, onPlay, onPause, onAddToPlaylist, onRemoveFromPlaylist }) => {
+const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, onRemoveFromPlaylist }) => {
   const audioRef    = useRef(null);
   const progressRef = useRef(null);
   const menuRef     = useRef(null);
@@ -17,10 +18,17 @@ const SongCard = ({ song, isActive, onPlay, onPause, onAddToPlaylist, onRemoveFr
   const [playing,  setPlaying]  = useState(false);
   const [current,  setCurrent]  = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume,   setVolume]   = useState(0.8);
-  const [muted,    setMuted]    = useState(false);
+  const { volume, setVolume, muted, setMuted } = usePlayer();
   const [dragging, setDragging] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+  if (isActive) {
+    audioRef.current?.play().catch(() => {});
+  } else {
+    audioRef.current?.pause();
+  }
+}, [isActive]);
 
   useEffect(() => {
     if (!isActive && audioRef.current && !audioRef.current.paused) {
@@ -49,7 +57,7 @@ const SongCard = ({ song, isActive, onPlay, onPause, onAddToPlaylist, onRemoveFr
     if (audioRef.current) setDuration(audioRef.current.duration);
   };
 
-  const handleEnded = () => { setPlaying(false); setCurrent(0); onPause(); };
+  const handleEnded = () => { setPlaying(false); setCurrent(0); onEnded?.(); };
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -103,14 +111,16 @@ const SongCard = ({ song, isActive, onPlay, onPause, onAddToPlaylist, onRemoveFr
   };
 
   return (
-    <div className={`song-card${isActive ? " song-card--active" : ""}`}>
+    <div className={`song-card${isActive ? " song-card--active" : ""}`}
+      onClick={togglePlay}
+      style={{ cursor: "pointer" }}
+    >
 
       {/* ── Left: thumbnail + play btn ── */}
       <div className="song-card-thumb">
         <img src={song.coverUrl || DEFAULT_COVER} alt={song.title} loading="lazy" />
         <button
           className={`song-card-thumb-btn${playing ? " song-card-thumb-btn--playing" : ""}`}
-          onClick={togglePlay}
           aria-label={playing ? "Pause" : "Play"}
         >
           {playing
