@@ -353,7 +353,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .navbar-user {
@@ -971,11 +971,11 @@ body {
   align-items: center;
   justify-content: center;
   transition: color var(--transition), background var(--transition);
-  opacity: 0;
+  opacity: 1;
 }
-
+/* 
 .song-card:hover .song-card-menu-btn,
-.song-card--active .song-card-menu-btn { opacity: 1; }
+.song-card--active .song-card-menu-btn { opacity: 1; } */
 
 .song-card-menu-btn:hover {
   color: var(--text-primary);
