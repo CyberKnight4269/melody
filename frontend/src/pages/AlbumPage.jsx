@@ -6,6 +6,7 @@ import Navbar            from "../components/Navbar";
 import SongCard          from "../components/SongCard";
 import UploadModal       from "../components/UploadModal";
 import AddToPlaylistModal from "../components/AddToPlaylistModal";
+import AddToAlbumModal from "../components/AddToAlbumModal";
 import { useSongQueue } from "../hooks/useSongQueue";
 
 const DEFAULT_COVER = "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600&q=80";
@@ -21,6 +22,7 @@ const AlbumPage = () => {
   const [activeSongId, setActiveSongId] = useState(null);
   const [showUpload, setShowUpload] = useState(false);
   const [addToPlaylistSong, setAddToPlaylistSong] = useState(null);
+  const [addToAlbumSong, setAddToAlbumSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
   // For admin: attach a loose song to this album
@@ -214,6 +216,7 @@ const AlbumPage = () => {
                   onPlay={() => { playQueue(songs, idx); setIsPlaying(true); }}
                   onPause={() => setIsPlaying(false)}
                   onAddToPlaylist={() => setAddToPlaylistSong(song)}
+                  onAddToAlbum={isAdmin ? () => setAddToAlbumSong(song) : undefined}
                   onEnded={isActive ? () => { playNext(); setIsPlaying(true); } : undefined}
                 />
               );
@@ -230,6 +233,12 @@ const AlbumPage = () => {
       )}
       {addToPlaylistSong && (
         <AddToPlaylistModal song={addToPlaylistSong} onClose={() => setAddToPlaylistSong(null)} />
+      )}
+      {isAdmin && addToAlbumSong && (
+        <AddToAlbumModal
+          song={addToAlbumSong}
+          onClose={() => setAddToAlbumSong(null)}
+        />
       )}
     </div>
   );

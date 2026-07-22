@@ -10,7 +10,7 @@ const formatTime = (secs) => {
   return `${m}:${s.toString().padStart(2, "0")}`;
 };
 
-const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, onRemoveFromPlaylist }) => {
+const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, onAddToAlbum, onRemoveFromPlaylist }) => {
   const audioRef    = useRef(null);
   const progressRef = useRef(null);
   const menuRef     = useRef(null);
@@ -112,12 +112,11 @@ const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, o
 
   return (
     <div className={`song-card${isActive ? " song-card--active" : ""}`}
-      onClick={togglePlay}
       style={{ cursor: "pointer" }}
     >
 
       {/* ── Left: thumbnail + play btn ── */}
-      <div className="song-card-thumb">
+      <div className="song-card-thumb" onClick={togglePlay} >
         <img src={song.coverUrl || DEFAULT_COVER} alt={song.title} loading="lazy" />
         <button
           className={`song-card-thumb-btn${playing ? " song-card-thumb-btn--playing" : ""}`}
@@ -137,7 +136,7 @@ const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, o
 
       {/* ── Centre: title + artist + progress ── */}
       <div className="song-card-body">
-        <div className="song-card-meta">
+        <div className="song-card-meta" onClick={togglePlay} >
           <span className="song-card-title" title={song.title}>{song.title}</span>
           <span className="song-card-artist" title={song.artist}>{song.artist}</span>
         </div>
@@ -159,7 +158,7 @@ const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, o
               <div className="song-card-progress-thumb" />
             </div>
           </div>
-          <span className="song-card-time">{formatTime(duration)}</span>
+          <span className="song-card-time" onClick={togglePlay} >{formatTime(duration)}</span>
         </div>
       </div>
 
@@ -214,6 +213,19 @@ const SongCard = ({ song, isActive, onPlay, onPause, onEnded, onAddToPlaylist, o
                     <line x1="14" y1="7" x2="20" y2="7"/>
                   </svg>
                   Add to playlist
+                </button>
+              )}
+              {onAddToAlbum && (
+                <button
+                  className="song-card-menu-item"
+                  onClick={() => { setMenuOpen(false); onAddToAlbum(song); }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 18V5l12-2v13"/>
+                    <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                  </svg>
+                  Add to album
                 </button>
               )}
               {onRemoveFromPlaylist && (

@@ -6,6 +6,8 @@ import SongCard           from "../components/SongCard";
 import UploadModal        from "../components/UploadModal";
 import CreateAlbumModal   from "../components/CreateAlbumModal";
 import AddToPlaylistModal from "../components/AddToPlaylistModal";
+import AddToAlbumModal from "../components/AddToAlbumModal";
+import { useAuth } from "../context/AuthContext";
 
 const SkeletonAlbum = () => (
   <div className="skeleton-card">
@@ -30,8 +32,11 @@ const HomePage = () => {
   const [showUpload,    setShowUpload]    = useState(false);
   const [showCreateAlbum, setShowCreateAlbum] = useState(false);
   const [addToPlaylistSong, setAddToPlaylistSong] = useState(null);
+  const [addToAlbumSong, setAddToAlbumSong] = useState(null);
 
   const debounceRef = useRef(null);
+
+  const { isAdmin } = useAuth();
 
   const fetchAlbums = async () => {
     try {
@@ -143,6 +148,7 @@ const HomePage = () => {
                       onPlay={() => setActiveSongId(id)}
                       onPause={() => setActiveSongId(null)}
                       onAddToPlaylist={setAddToPlaylistSong}
+                      onAddToAlbum={isAdmin ? () => setAddToAlbumSong(song) : undefined}
                     />
                   );
                 })
@@ -179,6 +185,12 @@ const HomePage = () => {
       )}
       {addToPlaylistSong && (
         <AddToPlaylistModal song={addToPlaylistSong} onClose={() => setAddToPlaylistSong(null)} />
+      )}
+      {isAdmin && addToAlbumSong && (
+        <AddToAlbumModal
+          song={addToAlbumSong}
+          onClose={() => setAddToAlbumSong(null)}
+        />
       )}
     </div>
   );

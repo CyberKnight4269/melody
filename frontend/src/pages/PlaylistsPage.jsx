@@ -4,6 +4,8 @@ import Navbar              from "../components/Navbar";
 import SongCard            from "../components/SongCard";
 import CreatePlaylistModal from "../components/CreatePlaylistModal";
 import AddToPlaylistModal  from "../components/AddToPlaylistModal";
+import AddToAlbumModal from "../components/AddToAlbumModal";
+import { useAuth } from "../context/AuthContext";
 import { useSongQueue } from "../hooks/useSongQueue";
 
 const PlaylistsPage = () => {
@@ -13,16 +15,20 @@ const PlaylistsPage = () => {
   const [activeSongId,    setActiveSongId]    = useState(null);
   const [showCreate,      setShowCreate]      = useState(false);
   const [addToPlaylistSong, setAddToPlaylistSong] = useState(null);
+  const [addToAlbumSong, setAddToAlbumSong] = useState(null);
   const [removing,        setRemoving]        = useState(null);
   const { activeSong, playQueue, playNext, clearQueue } = useSongQueue();
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Derive active playlist from playlists array — never stale
   const activePlaylist = playlists.find((p) => p._id === activePlaylistId) || null;
+  const songs = activePlaylist?.songs ?? [];
+
+  const {isAdmin} = useAuth();
 
   const handlePlayAll = () => {
   if (!activePlaylist?.songs?.length) return;
-  playQueue(activePlaylist.songs, 0);
+  playQueue(songs, 0);
   setIsPlaying(true);
   };
 
@@ -114,7 +120,6 @@ const PlaylistsPage = () => {
                 </div>
               ) : (
                 <>
-                  const songs = activePlaylist.songs ?? [];
                   <div className="playlists-content-header">
                     <h3 className="playlists-content-title">{activePlaylist.title}</h3>
                     {songs.length > 0 && (
@@ -132,7 +137,7 @@ const PlaylistsPage = () => {
                       <p className="playlists-content-desc">{activePlaylist.description}</p>
                     )}
                   </div>
-                  {activePlaylist.songs?.length === 0 ? (
+                  {songs?.length === 0 ? (
                     <div className="songs-empty">
                       <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
@@ -141,7 +146,7 @@ const PlaylistsPage = () => {
                     </div>
                   ) : (
                     <div className="song-list">
-                      {activePlaylist.songs.map((song, idx) => {
+                      {songs.map((song, idx) => {
                         const isActive = activeSong?._id === song._id;
                         return (
                           <SongCard
@@ -151,6 +156,7 @@ const PlaylistsPage = () => {
                             onPlay={() => { playQueue(songs, idx); setIsPlaying(true); }}
                             onPause={() => setIsPlaying(false)}
                             onAddToPlaylist={() => setAddToPlaylistSong(song)}
+                            onAddToAlbum={isAdmin ? () => setAddToAlbumSong(song) : undefined}
                             onRemoveFromPlaylist={() => handleRemoveSong(activePlaylistId,song._id)}
                             onEnded={isActive ? () => { playNext(); setIsPlaying(true); } : undefined}
                           />
@@ -173,6 +179,12 @@ const PlaylistsPage = () => {
           song={addToPlaylistSong}
           onClose={() => setAddToPlaylistSong(null)}
           onAdded={fetchPlaylists}
+        />
+      )}
+      {isAdmin && addToAlbumSong && (
+        <AddToAlbumModal
+          song={addToAlbumSong}
+          onClose={() => setAddToAlbumSong(null)}
         />
       )}
     </div>
