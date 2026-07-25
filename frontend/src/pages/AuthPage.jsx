@@ -5,6 +5,7 @@ import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 
 const AuthPage = () => {
+  const [error, setError] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,6 +24,7 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";
       const payload = isLogin
@@ -33,7 +35,7 @@ const AuthPage = () => {
       login(res.data.token);
       navigate("/");
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong.");
+      setError(error.response?.data?.message || "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -114,6 +116,15 @@ const AuthPage = () => {
             />
           </div>
 
+          {error &&
+            (<div className="auth-error">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+              {error}
+             </div>
+            )}
+
           <button
             type="submit"
             className="btn-primary"
@@ -129,7 +140,7 @@ const AuthPage = () => {
 
         <div className="auth-toggle">
           {isLogin ? "Don't have an account?" : "Already have an account?"}
-          <button type="button" onClick={() => setIsLogin(!isLogin)}>
+          <button type="button" onClick={() => {setIsLogin(!isLogin); setError("");}}>
             {isLogin ? "Sign up" : "Sign in"}
           </button>
         </div>
